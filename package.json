@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "ololog": "^1.1.175",
+    "ping": "^0.4.2"
+  }
+}

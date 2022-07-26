@@ -4,7 +4,8 @@ module.exports = {
         "name": "Apache Tomcat Lucee",
         "uri": "http://localhost/ysr-iis/dashboard",
         "window_service_name": "Lucee",
-        "check_interval": 1000 * 60 //1 minutes
+        "check_interval": 1000 * 7, //7 seconds
+        "failure_count_before_restart": 5
     }
   ]
 };

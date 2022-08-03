@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "fix-path": "^4.0.0",
     "ololog": "^1.1.175",
     "ping": "^0.4.2"
   }

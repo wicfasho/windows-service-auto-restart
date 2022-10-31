@@ -20,7 +20,7 @@ var logsileName = "./logs.json";
 var logsJson = require(logsileName);
 
 const optionsGET = {
-    timeout: 30000 //Wait 30 Seconds for site load
+    timeout: 30 * 1000 //Wait 30 Seconds for site load
 };
 
 var hosts = config.sites.map(element => element.uri);
@@ -82,18 +82,18 @@ function P_RESTART(site,service_name){
     let restart_count = site_state_variables[site_state_variables.findIndex(element => element.uri == site.uri)].restart_count[service_type];
     let machine_name = String.raw`\\${site.hostname}`;
     return new Promise( async (resolve,reject) => {
-        var check_service = await runCMD(`SC \\\\${site.hostname} QUERYEX ${service_name} | FIND "STATE" | FIND /v "RUNNING" > NUL && (echo 0) || (echo 1)`)
+        var check_service = await runCMD(`SC \\\\${site.hostname} QUERYEX "${service_name}" | FIND "STATE" | FIND /v "RUNNING" > NUL && (echo 0) || (echo 1)`)
         if(check_service.status == "success" && Number(check_service.description) == 1){ //RUNNING
             // @notice Max restart for IIS is 2 times (from when service restarts)
             if(restart_count <= 2 || service_type == "app_service"){
-                let stop_service = await runCMD(`SC ${machine_name} STOP ${service_name}`)
+                let stop_service = await runCMD(`SC ${machine_name} STOP "${service_name}"`)
                 if(stop_service.status == "success"){
                     log(`Service for [${site.hostname}] was stopped`, stop_service.description)
                     
                     // @notice wait some seconds before attempting to start
                     log(`Waiting for ${restart_wait_time} seconds before restarting...`.yellow)
                     setTimeout( async () => {
-                        let start_service = await runCMD(`SC ${machine_name} START ${service_name}`)
+                        let start_service = await runCMD(`SC ${machine_name} START "${service_name}"`)
                         if(start_service.status == "success"){
                             log(`Service for [${site.hostname}] has started`, start_service.description)
                             restart_count = ++site_state_variables[site_state_variables.findIndex(element => element.uri == site.uri)].restart_count[service_type]
@@ -112,7 +112,7 @@ function P_RESTART(site,service_name){
             }
         }
         else if(check_service.status == "success" && Number(check_service.description) == 0){ //STOPPED
-            let start_service = await runCMD(`SC ${machine_name} START ${service_name}`)
+            let start_service = await runCMD(`SC ${machine_name} START "${service_name}"`)
             if(start_service.status == "success"){
                 restart_count = ++site_state_variables[site_state_variables.findIndex(element => element.uri == site.uri)].restart_count[service_type]
                 log(`Service for [${site.hostname}] has started`, start_service.description)
@@ -258,6 +258,7 @@ function httpGetRequest(host, options, site) {
             log(`[${site.hostname}] ${host} is alive`.green);
 
             if(server_check_count >= hosts.length){
+                console.log('\r\n')
                 setTimeout( async () => {
                     start()
                 }, site.check_interval)

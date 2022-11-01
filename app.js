@@ -153,6 +153,18 @@ function restartService(site){
                     }
                 }
 
+                // Handle Notification
+                try{
+                    if( site.notification_uri.length >= 5 ){
+                        const trigger_notification = await httpGetRequest(site.notification_uri, optionsGET, site)
+                        log(`NOTIFICATION TRIGGERED: ${trigger_notification.status}`.bright.red)
+                    }else{
+                        throw new Error ("Notification URL Not Valid: " + site.notification_uri);
+                    }
+                }catch(e){
+                    log(`Could Not Trigger Notification: ${e.message}`.red)
+                }
+
                 restart_in_progress = site_state_variables[site_state_variables.findIndex(element => element.uri == site.uri)].restart_in_progress = false;
                 if(all_restart_successful){
                     log(site.hostname + " RESTARTED!!! I DIT IT! \n\n".bright.green);
@@ -269,18 +281,6 @@ function httpGetRequest(host, options, site) {
 
             const restart_service = await restartService(site);
             log(restart_service)
-
-            // Handle Notification
-            try{
-                if( site.notification_uri.length >= 5 ){
-                    const trigger_notification = await httpGetRequest(site.notification_uri, optionsGET, site)
-                    log(`NOTIFICATION TRIGGERED: ${trigger_notification.status}`.bright.red)
-                }else{
-                    throw new Error ("Notification URL Not Valid: " + site.notification_uri);
-                }
-            }catch(e){
-                log(`Could Not Trigger Notification: ${e.message}`.red)
-            }
 
             if(server_check_count >= hosts.length){
                 setTimeout( async () => {
